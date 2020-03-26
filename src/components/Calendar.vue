@@ -3,12 +3,10 @@
     <v-col>
       <v-sheet height="64">
         <v-toolbar flat color="white">
-          <v-btn color="primary" class="mr-4" @click="dialog = true" dark>
-            Ny händelse
-          </v-btn>
-          <v-btn outlined class="mr-4" @click="setToday">
-            Idag
-          </v-btn>
+          <v-btn color="primary" class="mr-4" @click="dialog = true" dark
+            >Ny händelse</v-btn
+          >
+          <v-btn outlined class="mr-4" @click="setToday">Idag</v-btn>
           <v-btn fab text small @click="prev">
             <v-icon small>mdi-chevron-left</v-icon>
           </v-btn>
@@ -51,9 +49,10 @@
           <v-container>
             <v-form @submit.prevent="addEvent">
               <v-text-field
-                vmodel="name"
+                v-model="name"
                 type="text"
                 label="event name (required)"
+                placeholder="gregerg"
               ></v-text-field>
 
               <v-text-field
@@ -66,8 +65,8 @@
                 v-model="start"
                 type="date"
                 label="start (required)"
-              >
-              </v-text-field>
+                placeholder="greg"
+              ></v-text-field>
 
               <v-text-field
                 v-model="end"
@@ -90,9 +89,8 @@
                 color="primary"
                 class="mr-4"
                 @click.stop="dialog = false"
+                >Skapa</v-btn
               >
-                Skapa
-              </v-btn>
             </v-form>
           </v-container>
         </v-card>
@@ -105,36 +103,36 @@
               <v-text-field
                 v-model="name"
                 type="text"
-                label="name"
+                label="Namn"
               ></v-text-field>
               <v-text-field
                 v-model="details"
                 type="text"
-                label="detail"
+                label="Beskrivning"
               ></v-text-field>
               <v-text-field
                 v-model="start"
                 type="date"
-                label="start"
+                label="Börjar"
               ></v-text-field>
               <v-text-field
                 v-model="end"
                 type="date"
-                label="end"
+                label="Slutar"
               ></v-text-field>
               <v-text-field
                 v-model="color"
-                type="color"
-                label="color"
+                type="text"
+                label="Färg"
+                placeholder="#d16449"
               ></v-text-field>
               <v-btn
                 type="submit"
                 color="primary"
                 class="mr-4"
                 @click.stop="dialog = false"
+                >skicka</v-btn
               >
-                skicka
-              </v-btn>
             </v-form>
           </v-container>
         </v-card>
@@ -181,30 +179,27 @@
                   style="width: 100%"
                   :min-height="100"
                   placeholder="add note"
-                >
-                </textarea-autosize>
+                ></textarea-autosize>
               </form>
             </v-card-text>
 
             <v-card-actions>
-              <v-btn text color="secondary" @click="selectedOpen = false">
-                Stäng
-              </v-btn>
+              <v-btn text color="secondary" @click="selectedOpen = false"
+                >Stäng</v-btn
+              >
               <v-btn
                 v-if="currentlyEditing !== selectedEvent.id"
                 text
                 @click.prevent="editEvent(selectedEvent)"
+                >Redigera</v-btn
               >
-                Redigera
-              </v-btn>
               <v-btn
                 text
                 v-else
                 type="submit"
                 @click.prevent="updateEvent(selectedEvent)"
+                >Spara</v-btn
               >
-                Spara
-              </v-btn>
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -226,9 +221,9 @@ export default {
       day: "Dag",
       "4day": "4 Dagar"
     },
-    name: null,
-    details: null,
-    start: null,
+    name: "",
+    details: "",
+    start: "",
     color: "#1976D2",
     currentlyEditing: null,
     selectedEvent: {},
