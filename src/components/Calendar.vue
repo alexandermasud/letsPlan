@@ -16,7 +16,7 @@
           <v-toolbar-title>{{ title }}</v-toolbar-title>
 
           <div class="flex-grow-1"></div>
-          <v-mnpm audit enu bottom right>
+          <v-menu bottom right>
             <template v-slot:activator="{ on }">
               <v-btn outlined v-on="on">
                 <span>{{ typeToLabel[type] }}</span>
@@ -37,7 +37,7 @@
                 <v-list-item-title>4 Dagar</v-list-item-title>
               </v-list-item>
             </v-list>
-          </v-mnpm>
+          </v-menu>
         </v-toolbar>
       </v-sheet>
 
@@ -102,7 +102,6 @@
           v-model="selectedOpen"
           :close-on-content-click="false"
           :activator="selectedElement"
-          full-width
           offset-x
         >
           <v-card color="grey lighten-4" :width="350" flat>
@@ -132,14 +131,14 @@
 
             <v-card-actions>
               <v-btn text color="secondary" @click="selectedOpen = false">
-                stäng
+                Stäng
               </v-btn>
               <v-btn
                 v-if="currentlyEditing !== selectedEvent.id"
                 text
                 @click.prevent="editEvent(selectedEvent)"
               >
-                redigera
+                Redigera
               </v-btn>
               <v-btn
                 text
@@ -181,6 +180,38 @@ export default {
     events: [],
     dialog: false
   }),
+  computed: {
+    title() {
+      const { start, end } = this;
+      if (!start || !end) {
+        return "";
+      }
+      const startMonth = this.monthFormatter(start);
+      const endMonth = this.monthFormatter(end);
+      const suffixMonth = startMonth === endMonth ? "" : endMonth;
+      const startYear = start.year;
+      const endYear = end.year;
+      const suffixYear = startYear === endYear ? "" : endYear;
+      const startDay = start.day + this.nth(start.day);
+      const endDay = end.day + this.nth(end.day);
+      switch (this.type) {
+        case "month":
+          return `${startMonth} ${startYear}`;
+        case "week":
+        case "4day":
+          return `${startMonth} ${startDay} ${startYear} - ${suffixMonth} ${endDay} ${suffixYear}`;
+        case "day":
+          return `${startMonth} ${startDay} ${startYear}`;
+      }
+      return "";
+    },
+    monthFormatter() {
+      return this.$refs.calendar.getFormatter({
+        timeZone: "UTC",
+        month: "long"
+      });
+    }
+  },
   mounted() {
     this.getEvents();
   },
@@ -194,6 +225,69 @@ export default {
         events.push(appData);
       });
       this.events = events;
+    },
+    async updateEvent(ev) {
+      await db
+        .collection("calEvent")
+        .doc(this.currentlyEditing)
+        .update({
+          details: ev.details
+        });
+      this.selectedOpen = false;
+      this.currentlyEditing = null;
+    },
+
+    async deleteEvent(ev) {
+      await db
+        .collection("calEvent")
+        .doc(ev)
+        .delete();
+      this.selectedOpen = false;
+      this.getEvents();
+    },
+    viewDay({ date }) {
+      (this.focus = date), (this.type = "day");
+    },
+    getEventColor(event) {
+      return event.color;
+    },
+    setToday() {
+      this.focus = this.today;
+    },
+    prev() {
+      this.$refs.calendar.prev();
+    },
+    next() {
+      this.$refs.calendar.next();
+    },
+
+    editEvent(ev) {
+      this.currentlyEditing = ev.id;
+    },
+    showEvent({ nativeEvent, event }) {
+      const open = () => {
+        this.selectedEvent = event;
+        this.selectedElement = nativeEvent.target;
+        setTimeout(() => (this.selectedOpen = true), 10);
+      };
+
+      if (this.selectedOpen) {
+        this.selectedOpen = false;
+        setTimeout(open, 10);
+      } else {
+        open();
+      }
+
+      nativeEvent.stopPropagation();
+    },
+    updateRange({ start, end }) {
+      this.start = start;
+      this.end = end;
+    },
+    nth(d) {
+      return d > 3 && d < 21
+        ? "th"
+        : ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"][d % 10];
     }
   }
 };
