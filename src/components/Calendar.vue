@@ -3,11 +3,8 @@
     <v-col>
       <v-sheet height="64">
         <v-toolbar flat color="white">
-          <v-btn color="primary" dark @click.stop="dialog = true">
-            New Event
-          </v-btn>
           <v-btn outlined class="mr-4" @click="setToday">
-            Today
+            Idag
           </v-btn>
           <v-btn fab text small @click="prev">
             <v-icon small>mdi-chevron-left</v-icon>
@@ -28,16 +25,16 @@
             </template>
             <v-list>
               <v-list-item @click="type = 'day'">
-                <v-list-item-title>Day</v-list-item-title>
+                <v-list-item-title></v-list-item-title>
               </v-list-item>
               <v-list-item @click="type = 'week'">
-                <v-list-item-title>Week</v-list-item-title>
+                <v-list-item-title>Vecka</v-list-item-title>
               </v-list-item>
               <v-list-item @click="type = 'month'">
-                <v-list-item-title>Month</v-list-item-title>
+                <v-list-item-title>Månad</v-list-item-title>
               </v-list-item>
               <v-list-item @click="type = '4day'">
-                <v-list-item-title>4 days</v-list-item-title>
+                <v-list-item-title>4 Dagar</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-mnpm>
@@ -79,7 +76,7 @@
                 class="mr-4"
                 @click.stop="dialog = false"
               >
-                submit
+                skicka
               </v-btn>
             </v-form>
           </v-container>
@@ -135,14 +132,14 @@
 
             <v-card-actions>
               <v-btn text color="secondary" @click="selectedOpen = false">
-                close
+                stäng
               </v-btn>
               <v-btn
                 v-if="currentlyEditing !== selectedEvent.id"
                 text
                 @click.prevent="editEvent(selectedEvent)"
               >
-                edit
+                redigera
               </v-btn>
               <v-btn
                 text
@@ -150,7 +147,7 @@
                 type="submit"
                 @click.prevent="updateEvent(selectedEvent)"
               >
-                Save
+                Spara
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -161,5 +158,43 @@
 </template>
 
 <script>
-export default {};
+import { db } from "@/main";
+export default {
+  data: () => ({
+    today: new Date().toISOString().substr(0, 10),
+    focus: new Date().toISOString().substr(0, 10),
+    type: "month",
+    typeToLabel: {
+      month: "Månad",
+      week: "Vecka",
+      day: "Dag",
+      "4day": "4 Dagar"
+    },
+    name: null,
+    details: null,
+    start: null,
+    color: "#1976D2",
+    currentlyEditing: null,
+    selectedEvent: {},
+    selectedElement: null,
+    selectedOpen: false,
+    events: [],
+    dialog: false
+  }),
+  mounted() {
+    this.getEvents();
+  },
+  methods: {
+    async getEvents() {
+      let snapshot = await db.collection("calEvent").get();
+      let events = [];
+      snapshot.forEach(doc => {
+        let appData = doc.data();
+        appData.id = doc.id;
+        events.push(appData);
+      });
+      this.events = events;
+    }
+  }
+};
 </script>
